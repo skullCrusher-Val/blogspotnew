@@ -1,11 +1,10 @@
 const Post = require("../model/Post");
 
-const formatDate = (date) => {
+const formatDate = (date, timeZone = "UTC") => {
   let inputDate = new Date(date);
-  let day = ("0" + inputDate.getDate()).slice(-2);
-  let month = ("0" + (inputDate.getMonth() + 1)).slice(-2);
-  let year = inputDate.getFullYear();
-  let formattedDate = day + "/" + month + "/" + year;
+  const formatter = new Intl.DateTimeFormat();
+  formatter.timeZone = timeZone;
+  const formattedDate = formatter.format(inputDate);
   return formattedDate;
 };
 
@@ -13,6 +12,7 @@ exports.getPublishPost = (req, res, next) => {
   const pageNumber = req.query.page || 1;
   const categoryId = req.query.catId;
   let searchData = req.query.search;
+  const userTimeZone = req.query.timeZone;
 
   const perPage = 7;
   let totalItem;
@@ -62,7 +62,7 @@ exports.getPublishPost = (req, res, next) => {
       }
 
       const postData = post.map((data) => {
-        let date = formatDate(data.createdAt);
+        let date = formatDate(data.createdAt, userTimeZone);
         return {
           image: data.image,
           postId: data._id,
@@ -91,6 +91,7 @@ exports.getPublishPost = (req, res, next) => {
 
 exports.postPublishPost = (req, res, next) => {
   const postId = req.body.postId;
+  const timeZone = req.body.timeZone;
 
   Post.findOne({ _id: postId })
     .populate("user", "name")
@@ -105,10 +106,10 @@ exports.postPublishPost = (req, res, next) => {
       return post.save();
     })
     .then((post) => {
-      const createDate = formatDate(post.createdAt);
+      const createDate = formatDate(post.createdAt, timeZone);
       let updateDate;
       if (post.updatedAt) {
-        updateDate = formatDate(post.updatedAt);
+        updateDate = formatDate(post.updatedAt, timeZone);
       }
 
       res.status(200).json({

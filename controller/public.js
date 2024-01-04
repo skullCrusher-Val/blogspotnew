@@ -1,14 +1,20 @@
 const Post = require("../model/Post");
 
 const formatDate = (date, timeZone = "UTC") => {
-  let inputDate = new Date(date);
-  const formatter = new Intl.DateTimeFormat();
-  formatter.timeZone = timeZone;
-  console.log(timeZone);
-  
-  const formattedDate = formatter.format(inputDate);
-  console.log(formattedDate);
-  return formattedDate;
+  const options = {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  };
+
+  const newdate = date.toLocaleString("en-US", options);
+  const splitDate = newdate.split("/");
+  const day = splitDate[1];
+  const month = splitDate[0];
+  const year = splitDate[2];
+  const formatDate = day + "/" + month + "/" + year;
+  return formatDate;
 };
 
 exports.getPublishPost = (req, res, next) => {

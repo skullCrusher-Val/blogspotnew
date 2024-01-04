@@ -4,7 +4,10 @@ const formatDate = (date, timeZone = "UTC") => {
   let inputDate = new Date(date);
   const formatter = new Intl.DateTimeFormat();
   formatter.timeZone = timeZone;
+  console.log(timeZone);
+  
   const formattedDate = formatter.format(inputDate);
+  console.log(formattedDate);
   return formattedDate;
 };
 

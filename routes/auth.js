@@ -5,8 +5,7 @@ const User = require("../model/User");
 const rourte = express.Router();
 
 const authController = require("../controller/auth");
-const { route } = require("./public");
-const auth = require("../middleware/auth");
+
 
 rourte.post(
   "/signup",
@@ -23,8 +22,7 @@ rourte.post(
             return Promise.reject("Email present!");
           }
         });
-      })
-      .normalizeEmail(),
+      }),
 
     body("name")
       .trim()

@@ -16,7 +16,7 @@ app.use(cookieParser());
 app.use(requestIp.mw());
 
 app.use((req, res, next) => {
-  const allowedOrigins = process.env.ALLOW_ORIGINES || "http://localhost:3000";
+  const allowedOrigins = "https://publicblogspot.netlify.app;
   res.setHeader("Access-Control-Allow-Origin", allowedOrigins);
   res.setHeader(
     "Access-Control-Allow-Methods",

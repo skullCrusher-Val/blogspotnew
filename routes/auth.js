@@ -5,8 +5,6 @@ const User = require("../model/User");
 const rourte = express.Router();
 
 const authController = require("../controller/auth");
-
-
 rourte.post(
   "/signup",
   [
@@ -23,7 +21,6 @@ rourte.post(
           }
         });
       }),
-
     body("name")
       .trim()
       .isString()
@@ -94,5 +91,7 @@ rourte.put(
   ],
   authController.postNewPassword
 );
+
+rourte.get("/logout", authController.getLogout);
 
 module.exports = rourte;

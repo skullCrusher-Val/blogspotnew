@@ -178,9 +178,12 @@ exports.login = (req, res, next) => {
         { expiresIn: process.env.LOGIN_EXPIRES + "ms" }
       );
 
+      const domain = process.env.DOMAIN || "localhost";
+
       const options = {
         maxAge: process.env.LOGIN_EXPIRES,
         httpOnly: true,
+        domain: domain,
       };
 
       if (process.env.APPLICATION_START_MODE === "production") {

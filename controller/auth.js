@@ -185,6 +185,7 @@ exports.login = (req, res, next) => {
 
       if (process.env.APPLICATION_START_MODE === "production") {
         options.secure = true;
+        options.sameSite = "None";
       }
 
       res.cookie("user_token", token, options);

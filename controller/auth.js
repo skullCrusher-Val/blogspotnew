@@ -410,7 +410,7 @@ exports.postNewPassword = (req, res, next) => {
 
 exports.getLogout = (req, res, next) => {
   const domain = process.env.DOMAIN || "localhost";
-  res.clearCookie("user_token", { domain: domain ,sameSite :"None"});
+  res.clearCookie("user_token", { domain: domain ,sameSite :"None", secure: true});
   res.status(200).json({ messgae: "logout done" });
 };
 

@@ -16,7 +16,7 @@ app.use(cookieParser());
 app.use(requestIp.mw());
 
 app.use((req, res, next) => {
-  const allowedOrigins = "https://publicblogspot.netlify.app";
+  const allowedOrigins = process.env.ALLOW_ORIGINES || "http://localhost:3000";
   res.setHeader("Access-Control-Allow-Origin", allowedOrigins);
   res.setHeader(
     "Access-Control-Allow-Methods",
@@ -26,6 +26,11 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type , Authorization");
   next();
 });
+
+// add rateLimit later
+//
+// code here
+//
 
 const storage = multer.memoryStorage();
 const upload = multer({

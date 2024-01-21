@@ -172,8 +172,16 @@ exports.login = (req, res, next) => {
 
       const secret = process.env.SECRET;
 
+      const clientIP = req.clientIp;
+      const clientUserAgent = req.headers["user-agent"];
+
       const token = jwt.sign(
-        { email: loadUser.email, userId: loadUser._id.toString() },
+        {
+          email: loadUser.email,
+          userId: loadUser._id.toString(),
+          ip: clientIP,
+          userAgent: clientUserAgent,
+        },
         secret,
         { expiresIn: process.env.LOGIN_EXPIRES + "ms" }
       );
@@ -207,28 +215,6 @@ exports.login = (req, res, next) => {
 };
 
 exports.tokenVerify = (req, res, next) => {
-  const cookieSting = req.headers.cookie;
-  const cookieName = "user_token";
-
-  const token = getCookieValue.getCookieValue(cookieSting, cookieName);
-
-  if (!token) {
-    const error = new Error("invalid token");
-    error.statusCode = 401;
-    throw error;
-  }
-
-  let decodeToken;
-  const secret = process.env.SECRET;
-
-  try {
-    decodeToken = jwt.verify(token, secret);
-  } catch (err) {
-    err.statusCode = 500;
-    throw err;
-  }
-
-  req.userId = decodeToken.userId;
   res.status(200).json({
     message: "valid auth",
   });
@@ -275,9 +261,10 @@ exports.sendResetLink = (req, res, next) => {
         To proceed with the password reset, please click on the link below. 
         This link is valid for <span style="font-weight: 600; color: #1f1f1f">15 minutes</span>. Do not share this with others.`;
 
-        let resetUrl =
-          process.env.RESET_URL + token ||
-          "http://localhost:3000/resetpassword?token=" + token;
+        let domain =
+          process.env.RESET_URL || "http://localhost:3000/resetpassword?token=";
+
+        let resetUrl = domain + token;
 
         let action = ` <a
               style="
@@ -302,7 +289,7 @@ exports.sendResetLink = (req, res, next) => {
                 "
               >
                 Click Here
-              </p></a`;
+              </p></a>`;
 
         let title = "Password Reset Link";
 
@@ -364,13 +351,9 @@ exports.postNewPassword = (req, res, next) => {
   const password = req.body.password;
   const token = req.body.token;
 
-  let encryptPassword;
-
   bcrypt
     .hash(password, 12)
     .then((hashPassword) => {
-      encryptPassword = hashPassword;
-
       User.findOne({
         _id: userId,
         resetToken: token,
@@ -410,6 +393,9 @@ exports.postNewPassword = (req, res, next) => {
 };
 
 exports.getLogout = (req, res, next) => {
+  const cookieSting = req.headers.cookie;
+  const cookieName = "user_token";
+  const token = getCookieValue.getCookieValue(cookieSting, cookieName);
   const domain = process.env.DOMAIN || "localhost";
   const option = {
     domain: domain,
@@ -419,4 +405,21 @@ exports.getLogout = (req, res, next) => {
   res.clearCookie("user_token", option);
   res.clearCookie("isLogin", option);
   res.status(200).json({ messgae: "logout done" });
+
+  User.findById(req.userId)
+    .then((user) => {
+      if (!user) {
+        const error = new Error("no user found");
+        error.statusCode = 403;
+        throw error;
+      }
+      user.blockedToken.push({ type: token });
+      return user.save();
+    })
+    .then((result) => {
+      console.log("logout");
+    })
+    .catch((err) => {
+      next(err);
+    });
 };
